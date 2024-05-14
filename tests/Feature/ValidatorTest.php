@@ -6,6 +6,8 @@ use Tests\TestCase;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Validator as ValidationValidator;
+
 use function PHPUnit\Framework\assertTrue;
 
 use function PHPUnit\Framework\assertFalse;
@@ -163,4 +165,32 @@ class ValidatorTest extends TestCase
         // dd($keys);
     }
 
+    function testValidationAdditionalValidation() {
+        $data = [
+            'username' => 'rena@gmail.com',
+            'password' => 'rena@gmail.com'
+        ];
+        
+        $rules = [
+            'username' => 'required|email|max:100',
+            'password' => 'required|min:6|max:20'
+        ];
+
+        $validator = Validator::make($data,$rules);
+        /* berfungsi untuk menambah rules baru setelah menjalankan validasi dengan rules diatas.
+        melakukan dobel pengecekan dengan rules tambahan */
+        $validator->after(function (ValidationValidator $validator){
+            $data = $validator->getData();
+            if ($data['username'] == $data['password']) {
+                $validator->errors()->add('password','Password tidak boleh sama dengan username');
+            }
+        });
+        assertNotNull($validator);
+
+        assertFalse($validator->passes());
+        assertTrue($validator->fails());
+
+        $msg = $validator->getMessageBag();
+        Log::error($msg->toJson(JSON_PRETTY_PRINT));
+    }
 }
