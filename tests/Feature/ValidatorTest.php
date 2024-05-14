@@ -85,4 +85,25 @@ class ValidatorTest extends TestCase
         }
     }
 
+    function testValidationMultipleRules() {
+        $data = [
+            'username' => 'rena',
+            'password' => '213'
+        ];
+        
+        $rules = [
+            'username' => 'required|email|max:100',
+            'password' => 'required|min:6|max:20'
+        ];
+
+        $validator = Validator::make($data,$rules);
+        assertNotNull($validator);
+
+        assertFalse($validator->passes());
+        assertTrue($validator->fails());
+
+        $msg = $validator->getMessageBag();
+        Log::error($msg->toJson(JSON_PRETTY_PRINT));
+        // dd($keys);
+    }
 }
