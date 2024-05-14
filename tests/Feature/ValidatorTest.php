@@ -2,15 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Tests\TestCase;
+use function PHPUnit\Framework\assertTrue;
 
 use function PHPUnit\Framework\assertFalse;
 use function PHPUnit\Framework\assertNotNull;
-use function PHPUnit\Framework\assertTrue;
 
 class ValidatorTest extends TestCase
 {
@@ -86,6 +85,7 @@ class ValidatorTest extends TestCase
     }
 
     function testValidationMultipleRules() {
+        App::setLocale("id");
         $data = [
             'username' => 'rena',
             'password' => '213'
@@ -106,7 +106,7 @@ class ValidatorTest extends TestCase
         Log::error($msg->toJson(JSON_PRETTY_PRINT));
         // dd($keys);
     }
-
+    
     function testValidationValidData() {
         $data = [
             'username' => 'ren@gmail.com',
@@ -118,11 +118,11 @@ class ValidatorTest extends TestCase
             'username' => 'required|email|max:100',
             'password' => 'required|min:6|max:20'
         ];
-
+        
         
         $validator = Validator::make($data,$rules);
         assertNotNull($validator);
-
+        
         try {
             // validate akan mengambil data yang valid yang ada di rules saja, data lain tidak eg: admin
             $valid = $validator->validate();
@@ -132,4 +132,35 @@ class ValidatorTest extends TestCase
             Log::error($exception->validator->errors()->toJson(JSON_PRETTY_PRINT));
         }
     }
+
+    function testValidationInlineMessage() {
+        App::setLocale("id");
+        $data = [
+            'username' => 'rena',
+            'password' => '213'
+        ];
+        
+        $rules = [
+            'username' => 'required|email|max:100',
+            'password' => 'required|min:6|max:20'
+        ];
+
+        $message = [
+            'required' => ':attribute harus diisi',
+            'email' => ':attribute harus berupa email',
+            'min' => ':attribute minimal :min karakter',
+            'max' => ':attribute maximal :max karakter',
+        ];
+
+        $validator = Validator::make($data,$rules,$message);
+        assertNotNull($validator);
+
+        assertFalse($validator->passes());
+        assertTrue($validator->fails());
+
+        $msg = $validator->getMessageBag();
+        Log::error($msg->toJson(JSON_PRETTY_PRINT));
+        // dd($keys);
+    }
+
 }
