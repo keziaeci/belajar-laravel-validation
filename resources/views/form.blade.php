@@ -21,13 +21,13 @@
         @method('post')
         @csrf
         <label for="username">username</label>
-        <input type="text" name="username" id="username"><br>
+        <input type="text" name="username" id="username" value="{{ old('username') }}"><br>
         @error('username')
         {{ $message }}
         @enderror
         <br>
         <label for="password">password</label>
-        <input type="password" name="password" id="password"><br>
+        <input type="password" name="password" id="password" ><br>
         @error('password')
         {{ $message }}
         @enderror
