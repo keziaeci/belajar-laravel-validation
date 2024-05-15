@@ -19,5 +19,9 @@ Route::get('/', function () {
 });
 
 Route::controller(FormController::class)->group(function () {
-    Route::post('/form/login', 'login');
+    Route::get('/login', function () {
+        return view('form');
+    });
+    Route::post('/submit/form', 'submitForm')->name('submit');
+    Route::post('/form/login', 'login')->name('login');
 });

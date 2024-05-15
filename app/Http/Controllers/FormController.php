@@ -7,6 +7,13 @@ use Illuminate\Http\Response;
 
 class FormController extends Controller
 {
+    function submitForm(Request $request) {
+        $data = $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+        return response('OK', Response::HTTP_OK);
+    }
     function login(Request $request)  {
         try {
             $data = $request->validate([
