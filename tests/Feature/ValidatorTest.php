@@ -269,4 +269,72 @@ class ValidatorTest extends TestCase
         // $msg = $validator->getMessageBag();
         // Log::error($msg->toJson(JSON_PRETTY_PRINT));
     }
+    
+    function testValidationNestedArray() {
+        $data = [
+            'name' => [
+                'first' => 'Maria',
+                // 'last' => 'Regina',
+            ],
+            'address' => [
+                'street' => 'Jalan yang jauh',
+                'city' => 'Seemarank',
+                'country' => 'Lawaknesia',
+            ]
+        ];
+        
+        $rules = [
+            'name.first' => ['required','max:100'],
+            'name.last' => ['max:100'],
+            'address.street' => ['max:200'],
+            'address.city' => ['required','max:200'],
+            'address.country' => ['required','max:200'],
+        ];
+    
+        $validator = Validator::make($data,$rules);
+        assertNotNull($validator);
+    
+        assertTrue($validator->passes());
+        assertFalse($validator->fails());
+    
+        // $msg = $validator->getMessageBag();
+        // Log::error($msg->toJson(JSON_PRETTY_PRINT));
+    }
+
+    function testValidationNestedIndexedArray() {
+        $data = [
+            'name' => [
+                'first' => 'Maria',
+                // 'last' => 'Regina',
+            ],
+            'address' => [
+                [
+                    'street' => 'Jalan yang jauh',
+                    'city' => 'Seemarank',
+                    'country' => 'Lawaknesia',
+                ],
+                [
+                    'street' => 'Jalan panjang',
+                    'city' => 'Seemarank',
+                    'country' => 'Lawaknesia',
+                ],
+            ]
+        ];
+        // ternyata * digunakan untuk akses data di indexed array
+        $rules = [
+            'name.first' => ['required','max:100'],
+            'name.last' => ['max:100'],
+            'address.*.street' => ['max:200'],
+            'address.*.city' => ['required','max:200'],
+            'address.*.country' => ['required','max:200'],
+        ];
+    
+        $validator = Validator::make($data,$rules);
+        assertNotNull($validator);
+    
+        assertTrue($validator->passes());
+        assertFalse($validator->fails());
+    }
+
+
 }
