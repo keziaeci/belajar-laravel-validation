@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Rules\RegistrationRule;
 use App\Rules\Uppercase;
 use Closure;
+use Illuminate\Validation\Rules\In;
 use Tests\TestCase;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Validator as ValidationValidator;
 
 use function PHPUnit\Framework\assertTrue;
@@ -219,7 +221,7 @@ class ValidatorTest extends TestCase
         $msg = $validator->getMessageBag();
         Log::error($msg->toJson(JSON_PRETTY_PRINT));
     }
-
+    
     function testValidationCustomFunctionRule() {
         $data = [
             'username' => 'rena@gmail.com',
@@ -241,8 +243,30 @@ class ValidatorTest extends TestCase
 
         assertFalse($validator->passes());
         assertTrue($validator->fails());
-
+        
         $msg = $validator->getMessageBag();
         Log::error($msg->toJson(JSON_PRETTY_PRINT));
+    }
+
+    function testValidationRuleClasses() {
+        $data = [
+            'username' => 'Rena',
+            'password' => 'rena123@gmail.com'
+        ];
+        
+        $rules = [
+            'username' => ['required', new In(["Rena", "Maria","Putri"])],
+            // 'username' => ['required','email','max:100', new Uppercase()],
+            'password' => ['required', Password::min(6)->letters()->symbols()->numbers()],
+        ];
+    
+        $validator = Validator::make($data,$rules);
+        assertNotNull($validator);
+    
+        assertTrue($validator->passes());
+        assertFalse($validator->fails());
+    
+        // $msg = $validator->getMessageBag();
+        // Log::error($msg->toJson(JSON_PRETTY_PRINT));
     }
 }
